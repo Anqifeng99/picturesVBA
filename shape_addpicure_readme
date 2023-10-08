@@ -2,7 +2,7 @@ To insert pictures into excel file you can use two methods
 
 1) worksheets("sheet1").pictures.insert(FileName)
 
-2) worksheets("sheet1").shapes.adppictures(FileName, LinkToFile, SaveWithDocument, Left, Top, Width, height)
+2) worksheets("sheet1").shapes.adppicture(FileName, LinkToFile, SaveWithDocument, Left, Top, Width, height)
 
 If you record macro and insert picture from the insert tab in excel, you will get the first method in the recorded code. But the picture will not be saved into the file, it will be just a link to the pcture on the disk. 
 If you try share the excel sheet with such links, a person, you sent file to, couldn't see pictures. To save picture in the excel sheet we should use shape.addpicture() method
