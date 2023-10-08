@@ -1,1 +1,41 @@
+Sub pictures_lookup()
+
+'The macros lookup a picture by item code from a folder on the disk
+'To use the macros you should keep pictures with names itemcode.format, like "10001.png" in a single folder
+'Path to files(excel workbook and pictures), MUST BE ONLY IN ENGLISH LETTERS. There could be an error, _
+if the path contains cyrillic, arab, hindi letters, latin letters with diacritic, chinese characters etc.
+
+'count number of items
+items_num = Range(Cells(1, 1), Range("a1").End(xlDown).Address).Rows.Count
+
+'prepare cells size to insert pictures
+
+Rows("2:" & items_num + 1).Select
+    Selection.RowHeight = 100
+    Columns("B:B").Select
+    Selection.ColumnWidth = 20
+    
+For cycle = 2 To items_num
+
+'incert pictures to cells
+
+Worksheets("sheet1").Shapes.AddPicture _
+    "D:\pictures\" & Cells(cycle, 1) & ".png", _
+    False, _
+    True, _
+    Cells(cycle, 2).Left, _
+    Cells(cycle, 2).Top, _
+    -1, -1
+    
+Next cycle
+
+'fit pictures into cells
+
+Worksheets("sheet1").Shapes.SelectAll
+Selection.ShapeRange.Height = 100
+Selection.Placement = xlMoveAndSize
+    
+
+End Sub
+
 
