@@ -11,14 +11,29 @@ Application.FileDialog(msoFileDialogFolderPicker).Show
 
 'count number of items
 
-items_num = Range(Cells(1, 1), Range("a1").End(xlDown).Address).Rows.Count
+Set art_rng = Application.InputBox("select article cell", "Select article", Type:=8)
+Set pic_rng = Application.InputBox("choose cell for pics", "Select pic column", Type:=8)
+If art_rng.Cells(1, 1) = "" Then
+item_num = Range(art_rng.End(xlDown).Address, Cells(Range(art_rng.End(xlDown).Address).Row + 1, Range(art_rng.End(xlDown).Address).Column).End(xlDown).Address).Rows.Count
+    Else: item_num = Range(art_rng.Cells(1, 1), art_rng.End(xlDown).Address).Rows.Count
+End If
 
 'prepare cells size to insert pictures
 
-Rows("2:" & items_num).Select
-    Selection.RowHeight = 100
-    Columns("B:B").Select
-    Selection.ColumnWidth = 20
+If art_rng.Cells(1, 1) = "" Then
+Rows("1:" & item_num + Range(art_rng.End(xlDown).Address).Row).Select
+    Else: Rows("1:" & item_num).Row.Select
+End If
+pic_size = MsgBox("Do you want to get big pictures(144px)?", 4)
+If pic_size = 6 Then
+Selection.RowHeight = 144
+Pic_rng.Columns.Select
+    Selection.ColumnWidth = 22
+Else: Selection.RowHeight = 72
+Pic_rng.Columns.Select
+    Selection.ColumnWidth = 15
+End If
+    
     
 For cycle = 2 To items_num
 
