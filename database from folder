@@ -1,0 +1,41 @@
+ActiveWorkbook.Queries.Add Name:="pictures", Formula:= _
+        "let" & Chr(13) & "" & Chr(10) & "    Source = Folder.Files(""D:\pictures"")" & Chr(13) & "" & Chr(10) & "in" & Chr(13) & "" & Chr(10) & "    Source"
+    ActiveWorkbook.Worksheets.Add
+    With ActiveSheet.ListObjects.Add(SourceType:=0, Source:= _
+        "OLEDB;Provider=Microsoft.Mashup.OleDb.1;Data Source=$Workbook$;Location=""pictures"";Extended Properties=""""" _
+        , Destination:=Range("$C$1")).QueryTable
+        .CommandType = xlCmdSql
+        .CommandText = Array("SELECT Name, Extension FROM [pictures]")
+        .RowNumbers = False
+        .FillAdjacentFormulas = False
+        .PreserveFormatting = True
+        .RefreshOnFileOpen = False
+        .BackgroundQuery = False
+        .RefreshStyle = xlInsertDeleteCells
+        .SavePassword = False
+        .SaveData = True
+        .AdjustColumnWidth = True
+        .RefreshPeriod = 0
+        .PreserveColumnInfo = True
+        .ListObject.DisplayName = "pictures"
+        .Refresh BackgroundQuery:=False
+    End With
+    
+    ActiveSheet.ListObjects("pictures").Unlist
+
+    ActiveWorkbook.Queries("pictures").Delete
+    
+    For x = 2 To ActiveSheet.Range(Cells(2, 3), Range("C1").End(xlDown).Address).Rows.Count
+    y = WorksheetFunction.FindB(Cells(x, 3), ".", -1)
+    cells(x,2) = activeworkbook.Application.Right(cells(x,3), worksheetfunction.match(
+    
+    
+   ' Columns("C:C").Select
+    
+   ' Selection.TextToColumns Destination:=Range("A1"), DataType:=xlDelimited, _
+        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
+        Semicolon:=False, Comma:=False, Space:=False, Other:=True, OtherChar _
+        :=".", FieldInfo:=Array(1, 1), TrailingMinusNumbers:=True
+        
+    ' Columns("B:C").Delete
+End Sub
