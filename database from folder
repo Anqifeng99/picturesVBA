@@ -1,41 +1,118 @@
-ActiveWorkbook.Queries.Add Name:="pictures", Formula:= _
-        "let" & Chr(13) & "" & Chr(10) & "    Source = Folder.Files(""D:\pictures"")" & Chr(13) & "" & Chr(10) & "in" & Chr(13) & "" & Chr(10) & "    Source"
-    ActiveWorkbook.Worksheets.Add
+    
+Sub pictures_lookup()
+
+'The macros lookup a picture by item code from a folder on disk
+'To use the macros you should keep pictures with names itemcode.format, like "10001.png" in a single folder
+'path to files, excel workbook and pictures, MUST BE ONLY IN ENGLISH LETTERS. There could be an error, _
+if the path contains cyrillic, arab, hindi letters, latin letters with diacritic, chinese characters etc.
+
+'choose folder with pictures
+Application.FileDialog(msoFileDialogFolderPicker).Show
+    pic_folder = """" & Application.FileDialog(msoFileDialogFolderPicker).SelectedItems(1) & """"
+    
+'count number of items
+
+Set art_rng = Application.InputBox("select article column", "Select article", Type:=8)
+Set Pic_rng = Application.InputBox("choose Column for pics", "Select pic column", Type:=8)
+ActiveSheet.Name = "Stock"
+If art_rng.Cells(1, 1) = "" Then
+item_num = Range(art_rng.End(xlDown).Address, Cells(Range(art_rng.End(xlDown).Address).Row + 1, Range(art_rng.End(xlDown).Address).Column).End(xlDown).Address).Rows.Count
+    Else: item_num = Range(art_rng.Cells(1, 1), art_rng.End(xlDown).Address).Rows.Count
+End If
+
+'prepare cells size to insert pictures
+
+If art_rng.Cells(1, 1) = "" Then
+Rows("1:" & item_num + Range(art_rng.End(xlDown).Address).Row).Select
+    Else: Rows("1:" & item_num).Row.Select
+End If
+pic_size = MsgBox("Do you want to get big pictures(140px)?", 4)
+If pic_size = 6 Then
+Selection.RowHeight = 144
+Pic_rng.Columns.Select
+    Selection.ColumnWidth = 22
+Else: Selection.RowHeight = 72
+Pic_rng.Columns.Select
+    Selection.ColumnWidth = 12
+End If
+    
+'Find locations of the pictures
+    
+
+ActiveWorkbook.Queries.Add Name:="pics", Formula:= _
+        "let" & Chr(13) & "" & Chr(10) & "    Source = Folder.Files(" & pic_folder & ")" & Chr(13) & "" & Chr(10) & "in" & Chr(13) & "" & Chr(10) & "    Source"
+    ActiveWorkbook.Worksheets.Add.Name = "pics"
     With ActiveSheet.ListObjects.Add(SourceType:=0, Source:= _
-        "OLEDB;Provider=Microsoft.Mashup.OleDb.1;Data Source=$Workbook$;Location=""pictures"";Extended Properties=""""" _
+        "OLEDB;Provider=Microsoft.Mashup.OleDb.1;Data Source=$Workbook$;Location=""pics"";Extended Properties=""""" _
         , Destination:=Range("$C$1")).QueryTable
         .CommandType = xlCmdSql
-        .CommandText = Array("SELECT Name, Extension FROM [pictures]")
+        .CommandText = Array("SELECT * FROM [pics]")
         .RowNumbers = False
         .FillAdjacentFormulas = False
         .PreserveFormatting = True
         .RefreshOnFileOpen = False
-        .BackgroundQuery = False
+        .BackgroundQuery = True
         .RefreshStyle = xlInsertDeleteCells
         .SavePassword = False
         .SaveData = True
         .AdjustColumnWidth = True
         .RefreshPeriod = 0
         .PreserveColumnInfo = True
-        .ListObject.DisplayName = "pictures"
+        .ListObject.DisplayName = "pics"
         .Refresh BackgroundQuery:=False
     End With
     
-    ActiveSheet.ListObjects("pictures").Unlist
+    ActiveSheet.ListObjects("pics").Unlist
 
-    ActiveWorkbook.Queries("pictures").Delete
+    ActiveWorkbook.Queries("pics").Delete
     
-    For x = 2 To ActiveSheet.Range(Cells(2, 3), Range("C1").End(xlDown).Address).Rows.Count
-    y = WorksheetFunction.FindB(Cells(x, 3), ".", -1)
-    cells(x,2) = activeworkbook.Application.Right(cells(x,3), worksheetfunction.match(
+    Worksheets("pics").Select
+    NoP = Range("b2", Cells(1, 2).End(xlDown).Address).Rows.Count
+    Range(Cells(2, 1), Cells(NoP, 1)).FormulaR1C1 = "=VALUE(LEFT(RC[2],9))"
+    Range(Cells(2, 2), Cells(NoP, 2)).FormulaR1C1 = "=RC[6]&RC[1]"
     
-    
-   ' Columns("C:C").Select
-    
-   ' Selection.TextToColumns Destination:=Range("A1"), DataType:=xlDelimited, _
-        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
-        Semicolon:=False, Comma:=False, Space:=False, Other:=True, OtherChar _
-        :=".", FieldInfo:=Array(1, 1), TrailingMinusNumbers:=True
-        
-    ' Columns("B:C").Delete
+'looking up pictures
+
+If art_rng.Cells(1, 1) = "" Then
+cycles = Rows("1:" & item_num + Range(art_rng.End(xlDown).Address).Row).Count
+    Else: cycles = Rows("1:" & item_num).Row.Select
+End If
+
+Worksheets("Stock").Select
+
+For x = 1 To cycles
+Itemcode = art_rng(x, 1)
+
+On Error Resume Next
+Pic_rng.Cells(x, 1).Select
+
+If pic_size = 6 Then
+ActiveSheet.Shapes.AddPicture _
+    Application.WorksheetFunction.XLookup(Itemcode, Worksheets("pics").Range("a:a"), Worksheets("pics").Range("b:b")), _
+    False, _
+    True, _
+    ActiveCell.Left + 2, _
+    ActiveCell.Top + 2, _
+    94, 140
+Else: ActiveSheet.Shapes.AddPicture _
+    Application.WorksheetFunction.XLookup(Itemcode, Worksheets("pics").Range("a:a"), Worksheets("pics").Range("b:b")), _
+    False, _
+    True, _
+    ActiveCell.Left + 1, _
+    ActiveCell.Top + 1, _
+    47, 70
+End If
+
+Next x
+
+'fit pictures into cells
+
+Worksheets("sheet1").Shapes.SelectAll
+Selection.Placement = xlMoveAndSize
+
+Application.DisplayAlerts = False
+Worksheets("pics").Delete
+Application.DisplayAlerts = True
+
 End Sub
+
