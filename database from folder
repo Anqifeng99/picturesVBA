@@ -12,8 +12,8 @@ Application.FileDialog(msoFileDialogFolderPicker).Show
     
 'count number of items
 
-Set art_rng = Application.InputBox("select article column", "Select articles", Type:=8)
-Set Pic_rng = Application.InputBox("Select Column for pics", "Select pics column", Type:=8)
+Set art_rng = Application.InputBox("select article column", "Select article", Type:=8)
+Set Pic_rng = Application.InputBox("choose Column for pics", "Select pic column", Type:=8)
 ActiveSheet.Name = "Stock"
 If art_rng.Cells(1, 1) = "" Then
 item_num = Range(art_rng.End(xlDown).Address, Cells(Range(art_rng.End(xlDown).Address).Row + 1, Range(art_rng.End(xlDown).Address).Column).End(xlDown).Address).Rows.Count
@@ -22,7 +22,7 @@ End If
 
 'prepare cells size to insert pictures
 
-If art_rng.Columns.Cells(1, 1) = "" Then
+If art_rng.Cells(1, 1) = "" Then
 Rows("1:" & item_num + Range(art_rng.End(xlDown).Address).Row).Select
     Else: Rows("1:" & item_num).Row.Select
 End If
@@ -30,10 +30,10 @@ pic_size = MsgBox("Do you want to get big pictures(140px)?", 4)
 If pic_size = 6 Then
 Selection.RowHeight = 144
 Pic_rng.Columns.Select
-    Selection.ColumnWidth = 18
+    Selection.ColumnWidth = 22
 Else: Selection.RowHeight = 72
 Pic_rng.Columns.Select
-    Selection.ColumnWidth = 9
+    Selection.ColumnWidth = 12
 End If
     
 'Find locations of the pictures
@@ -81,22 +81,21 @@ End If
 Worksheets("Stock").Select
 
 For x = 1 To cycles
-
-itemcode = art_rng(x, 1)
+Itemcode = art_rng(x, 1)
 
 On Error Resume Next
 Pic_rng.Cells(x, 1).Select
 
 If pic_size = 6 Then
 ActiveSheet.Shapes.AddPicture _
-    Application.WorksheetFunction.XLookup(itemcode, Worksheets("pics").Range("a:a"), Worksheets("pics").Range("b:b")), _
+    Application.WorksheetFunction.XLookup(Itemcode, Worksheets("pics").Range("a:a"), Worksheets("pics").Range("b:b")), _
     False, _
     True, _
     ActiveCell.Left + 2, _
     ActiveCell.Top + 2, _
     94, 140
 Else: ActiveSheet.Shapes.AddPicture _
-    Application.WorksheetFunction.XLookup(itemcode, Worksheets("pics").Range("a:a"), Worksheets("pics").Range("b:b")), _
+    Application.WorksheetFunction.XLookup(Itemcode, Worksheets("pics").Range("a:a"), Worksheets("pics").Range("b:b")), _
     False, _
     True, _
     ActiveCell.Left + 1, _
@@ -108,10 +107,9 @@ Next x
 
 'fit pictures into cells
 
-Worksheets("Stock").Shapes.SelectAll
+Worksheets("sheet1").Shapes.SelectAll
 Selection.Placement = xlMoveAndSize
 
-'cleaning file
 Application.DisplayAlerts = False
 Worksheets("pics").Delete
 Application.DisplayAlerts = True
